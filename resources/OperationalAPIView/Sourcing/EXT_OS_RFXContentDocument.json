@@ -1,0 +1,40 @@
+{
+    "viewTemplateName": "EXT_OS_RFXContentDocument",
+    "type": "custom",
+    "status": "published",
+    "documentType": "RFXContentDocument",
+    "selectAttributes": [
+        "LastModifiedBy",
+        "Owner",
+        "Description",
+        "DocumentId",
+        "LastModified",
+        "TimeCreated",
+        "DocumentVersion",
+        "Status",
+        "InternalId",
+        "IsVersionPinned",
+        "IsPublishRequired",
+        "Title",
+        "TimeUpdated",
+        "TemplateObject",
+        "Active",
+        "ParentWorkspace",
+        "Content",
+        "NextVersion"
+    ],
+    "filterExpressions": [
+        {
+            "name": "updatedDateTo",
+            "field": "TimeCreated",
+            "op": "<=",
+            "defaultValue": null
+        },
+        {
+            "name": "updatedDateFrom",
+            "field": "TimeCreated",
+            "op": ">",
+            "defaultValue": null
+        }
+    ]
+}

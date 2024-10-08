@@ -1,0 +1,36 @@
+{
+    "status": "published",
+    "documentType": "ContractWorkspace",
+    "selectAttributes": [
+       "Status",
+        "LastModifiedBy",
+        "InternalId",
+        "Owner",
+        "Description",
+        "DocumentId",
+        "Title",
+        "TimeUpdated",
+        "LastModified",
+        "TimeCreated",
+        "Active",
+        "ProjectAddin",
+        "ParentWorkspace",
+        "Version",
+        "ParentDocument",
+        "ProcessId"
+    ],
+    "filterExpressions": [
+        {
+            "name": "updatedDateTo",
+            "field": "TimeCreated",
+            "op": "<=",
+            "defaultValue": null
+        },
+        {
+            "name": "updatedDateFrom",
+            "field": "TimeCreated",
+            "op": ">",
+            "defaultValue": null
+        }
+    ]
+}

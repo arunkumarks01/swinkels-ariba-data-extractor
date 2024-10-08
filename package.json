@@ -1,0 +1,76 @@
+{
+  "name": "kit-data-lake",
+  "version": "1.0.0",
+  "description": "A simple CAP project.",
+  "repository": "<Add your repository here>",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@sap-cloud-sdk/core": "^1.54.0",
+    "@sap-cloud-sdk/util": "^2.1.0",
+    "@sap/cds": "~6.6.1",
+    "@sap/cds-dk": "~6.6.1",
+    "@sap/hana-client": "^2.13.22",
+    "@sap/xsenv": "^3.3.2",
+    "@sap/xssec": "^3.2.13",
+    "axios": "^0.27.2",
+    "cds-dbm": "~0.1.4",
+    "cds-pg": "~0.1.35",
+    "express": "^4.18.1",
+    "flat": "^5.0.2",
+    "fs": "*",
+    "moment": "^2.29.3",
+    "passport": "^0.6.0",
+    "path": "^0.12.7",
+    "unzipper": "^0.10.11",
+    "uuid": "^8.3.2",
+    "qs": "6.11.1"
+  },
+  "devDependencies": {
+    "sqlite3": "^5.0.10"
+  },
+  "engines": {
+    "node": "^18",
+    "npm": "^9"
+  },
+  "cds": {
+    "features": {
+      "cds_tx_inheritance": false,
+      "cds_tx_protection": false
+    },
+    "odata": {
+      "version": "v4"
+    },
+    "query": {
+      "limit": {
+        "default": 100,
+        "max": 5000
+      }
+    },
+    "hana": {
+      "deploy-format": "hdbtable"
+    },
+    "requires": {
+      "db": {
+        "kind": "hana"
+      },
+      "auth": {
+        "kind": "xsuaa"
+      }
+    }
+  },
+  "scripts": {
+    "start": "cds run",
+    "local:docker:run": "docker-compose up",
+    "local:db:build": "npx cds-dbm deploy --create-db",
+    "local:debug": "node --inspect node_modules/@sap/cds/bin/cds run",
+    "mta:package": "mbt build --mtar mta-kit-datalake --platform cf",
+    "mta:deploy": "cf deploy mta_archives/mta-kit-datalake.mtar -f",
+    "mta:package:deploy": "npm run mta:package && npm run mta:deploy",
+    "ssh:pg": "cf ssh -L 63306:postgres-c7fe464f-a81e-4174-8fb0-b8b98c10e431.ce4jcviyvogb.eu-central-1.rds.amazonaws.com:4930 kit-data-lake-srv",
+    "ssh:pgkIT": "cf ssh -L 63306:postgres-0ff36055-73b9-470a-8e10-9a646367c18b.cxxzc36no8yr.eu-central-1.rds.amazonaws.com:8776 kit-data-lake-srv",
+    "mta:deploy:db": "cf deploy mta_archives/mta-kit-datalake.mtar -f -m kit-data-lake-pgdb-deployer",
+    "mta:package:deploy:db": "npm run mta:package && npm run mta:deploy:db",
+    "cf:test": "cf login -a https://api.cf.eu12.hana.ondemand.com --sso"
+  }
+}

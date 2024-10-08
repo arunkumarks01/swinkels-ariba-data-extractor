@@ -1,0 +1,149 @@
+## Generated mta.yaml based on template version 0.2.0
+## appName = dataextraction
+## language=nodejs; multiTenant=false
+## approuter=
+_schema-version: '3.1'
+ID: kit-datalake
+version: 1.0.0
+description: "SAP Ariba Extraction Data Lake"
+parameters:
+  enable-parallel-deployments: true
+  
+build-parameters:
+  before-all:
+   - builder: custom
+     commands:
+      - npm install --production
+      - cds build --production
+
+modules:
+
+ # --------------------- SERVER MODULE ------------------------
+ - name: kit-data-lake-srv
+ # ------------------------------------------------------------
+   type: nodejs
+   path: gen/srv
+   build-parameters:
+     ignore: ["node_modules/"]
+   properties:
+     EXIT: 1  # required by deploy.js task to terminate 
+     SAP_JWT_TRUST_ACL:
+     - clientid: "*"
+     identityzone: "*"
+   parameters:
+     app-name: kit-data-lake-srv
+     disk-quota: 2048M
+     memory: 1024M
+   requires:
+    # Resources extracted from CAP configuration
+    - name: kit-data-lake-hana
+    - name: kit-data-lake-uaa
+    - name: kit-data-lake-dest
+    - name: kit-data-lake-conn
+    - name: kit-data-lake-log
+    #- name: kit-data-lake-jobscheduler
+   provides:
+    - name: srv-api      # required by consumers of CAP services (e.g. approuter)
+      public: true
+      properties:
+        url: ${default-url}
+
+#  - name: kit-data-lake-pgdb-deployer
+#    type: custom
+#    path: gen/db
+#    parameters:
+#      buildpacks: [https://github.com/cloudfoundry/apt-buildpack#v0.2.2, nodejs_buildpack] 
+#      no-route: true
+#      no-start: true
+#      disk-quota: 2GB
+#      memory: 512MB
+#      tasks:
+#      - name: deploy_to_postgresql
+#        command: chmod 755 deploy.sh && ./deploy.sh
+#        disk-quota: 2GB
+#        memory: 512MB      
+#    build-parameters:
+#      ignore: ["node_modules/"]
+#    requires:
+#      - name: kit-data-lake-pgdatabase 
+
+ - name: kit-data-lake-db-deployer
+   type: hdb
+   path: gen/db
+   build-parameters:
+     ignore: ["node_modules/"]
+   parameters:
+     instances: 1
+     disk-quota: 512M
+     memory: 512M
+   requires:
+     - name: kit-data-lake-hana
+     - name: kit-data-lake-uaa
+     
+resources:
+# # ------------------------------------------------------------
+#  - name: kit-data-lake-pgdatabase
+# # ------------------------------------------------------------
+#    parameters:
+#      path: ./pg-options.json
+#      service: postgresql-db
+#      service-plan: standard
+#      skip-service-updates:
+#       parameters: true
+#      service-tags:
+#        - plain
+#    type: org.cloudfoundry.managed-service
+
+# ------------------------------------------------------------
+ - name: kit-data-lake-hana
+# ------------------------------------------------------------
+   type: org.cloudfoundry.managed-service
+   parameters:
+     service: hana
+     service-plan: hdi-shared
+     config:
+       schema: SAP_ARIBA_DL
+   properties:
+     hdi-service-name: ${service-name}
+
+# # ------------------------------------------------------------
+#  - name: kit-data-lake-jobscheduler
+# # ------------------------------------------------------------
+#    type: org.cloudfoundry.managed-service
+#    parameters:
+#      service-plan: standard
+#      service: jobscheduler
+#      config:
+#       enable-xsuaa-support: true 
+
+# ------------------------------------------------------------
+ - name: kit-data-lake-uaa
+# ------------------------------------------------------------
+   type: org.cloudfoundry.managed-service
+   parameters:
+     service: xsuaa
+     service-plan: application  
+     path: ./xs-security.json
+
+# ------------------------------------------------------------
+ - name: kit-data-lake-dest
+# ------------------------------------------------------------
+   type: org.cloudfoundry.managed-service
+   parameters:
+     service-plan: lite
+     service: destination
+
+# ------------------------------------------------------------
+ - name: kit-data-lake-conn
+# ------------------------------------------------------------
+   type: org.cloudfoundry.managed-service
+   parameters:
+     service-plan: lite
+     service: connectivity
+# ------------------------------------------------------------
+ - name: kit-data-lake-log
+# ------------------------------------------------------------
+   type: org.cloudfoundry.managed-service
+   parameters:
+     service-plan: lite
+     service: application-logs
